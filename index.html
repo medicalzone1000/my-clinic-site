@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>عيادة التجميل</title>
+  <meta name="description" content="">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700&family=IBM+Plex+Sans+Arabic:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#content">تخطي إلى المحتوى</a>
+
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <a id="top-phone" href="#"></a>
+      <a id="top-email" href="#"></a>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="#home" class="logo"><span data-bind="settings.logoPrefix"></span> <span data-bind="settings.doctorName"></span></a>
+      <button class="menu-btn" aria-label="القائمة" aria-expanded="false" aria-controls="nav"><span></span><span></span><span></span></button>
+      <nav id="nav" class="nav"></nav>
+    </div>
+  </header>
+
+  <main id="content">
+    <section class="hero" id="home">
+      <div class="container hero-grid">
+        <div class="hero-text">
+          <p class="hero-role" data-bind="hero.role"></p>
+          <h1 data-bind="hero.title"></h1>
+          <p class="lead" data-bind="hero.lead"></p>
+          <div class="hero-actions">
+            <a class="btn" data-bind="hero.btn1" data-href="hero.btn1Link" href="#"></a>
+            <a class="btn btn-ghost" data-bind="hero.btn2" data-href="hero.btn2Link" href="#"></a>
+          </div>
+        </div>
+        <div class="hero-visual" id="hero-visual" aria-hidden="true">
+          <div class="shape shape-a"></div>
+          <div class="shape shape-b"></div>
+          <p class="hero-note">ضع هنا صورة الطبيب</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about" data-section="about">
+      <div class="container about-grid">
+        <div>
+          <h2 data-bind="about.title"></h2>
+          <p data-bind="about.p1"></p>
+          <p data-bind="about.p2"></p>
+        </div>
+        <ul class="facts" id="facts"></ul>
+      </div>
+    </section>
+
+    <section class="section section-tint" id="services" data-section="services">
+      <div class="container">
+        <h2 data-bind="services.title"></h2>
+        <p class="section-sub" data-bind="services.subtitle"></p>
+        <div class="services" id="services-list"></div>
+      </div>
+    </section>
+
+    <section class="section" id="hospital" data-section="hospital">
+      <div class="container split">
+        <div>
+          <h2 data-bind="hospital.title"></h2>
+          <p data-bind="hospital.text"></p>
+        </div>
+        <ul class="points" id="points"></ul>
+      </div>
+    </section>
+
+    <section class="section section-dark" id="why" data-section="why">
+      <div class="container">
+        <h2 data-bind="why.title"></h2>
+        <div class="why" id="why-list"></div>
+      </div>
+    </section>
+
+    <section class="section" id="articles" data-section="articles">
+      <div class="container">
+        <h2 data-bind="articles.title"></h2>
+        <div class="articles" id="articles-list"></div>
+      </div>
+    </section>
+
+    <section class="section section-tint" id="contact" data-section="contact">
+      <div class="container contact-grid">
+        <div>
+          <h2 data-bind="contact.title"></h2>
+          <p data-bind="contact.text"></p>
+          <h3 class="branches-title" data-bind="contact.branchesTitle"></h3>
+          <ul class="branches" id="branches"></ul>
+        </div>
+        <form id="contact-form" novalidate>
+          <label>الاسم<input name="name" type="text" required autocomplete="name"></label>
+          <label>رقم الهاتف<input name="phone" type="tel" required autocomplete="tel" inputmode="tel"></label>
+          <label>البريد الإلكتروني<input name="email" type="email" autocomplete="email"></label>
+          <label>رسالتك<textarea name="message" rows="4"></textarea></label>
+          <button type="submit" class="btn">إرسال</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> <span data-bind="settings.footerText"></span></p>
+      <p class="disclaimer" data-bind="settings.disclaimer"></p>
+    </div>
+  </footer>
+
+  <a class="wa" id="wa" href="#" aria-label="واتساب">واتساب</a>
+
+  <script src="data.js"></script>
+  <script src="render.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
