@@ -49,3 +49,11 @@ h2.sub{font-size:1.05rem;color:var(--p);margin:1.5rem 0 .8rem}
   .side.open{transform:none}
   .icon-btn{display:block}
 }
+
+[hidden]{display:none!important}
+.gate{min-height:100vh;display:grid;place-items:center;padding:1rem;background:var(--bg)}
+.gate-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.8rem;width:min(420px,100%);display:grid;gap:.4rem}
+.gate-card h1{color:var(--p);font-size:1.3rem}
+.gate-card p{color:#7a6a77;font-size:.92rem;margin-bottom:.6rem}
+.gate-card .btn{margin-top:.4rem}
+.g-status{color:var(--danger)!important;min-height:1.4em}

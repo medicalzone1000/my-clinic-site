@@ -8,7 +8,19 @@
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-  <div class="app">
+    <div id="gate" class="gate" hidden>
+    <form id="gate-form" class="gate-card">
+      <h1>تسجيل الدخول</h1>
+      <p>أدخل بيانات المستودع وتوكن GitHub الذي يملك صلاحية الكتابة عليه.</p>
+      <label class="field"><span>اسم المستخدم (Owner)</span><input id="g-owner" type="text" required autocomplete="off"></label>
+      <label class="field"><span>اسم المستودع</span><input id="g-repo" type="text" required autocomplete="off"></label>
+      <label class="field"><span>GitHub Token</span><input id="g-token" type="password" required autocomplete="off"></label>
+      <label class="check"><input id="g-remember" type="checkbox"><span>تذكر التوكن على هذا الجهاز</span></label>
+      <button class="btn" type="submit">دخول</button>
+      <p id="g-status" class="g-status" role="alert"></p>
+    </form>
+  </div>
+  <div class="app" hidden>
     <aside class="side">
       <div class="brand">لوحة التحكم</div>
       <nav id="menu"></nav>

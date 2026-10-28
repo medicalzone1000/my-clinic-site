@@ -328,5 +328,57 @@
     window.scrollTo(0, 0);
   }
   document.getElementById('toggle').addEventListener('click', function () { side.classList.toggle('open'); });
-  render();
+
+  /* ---------- Login gate: the GitHub token must have write access to the repo ---------- */
+  var app = document.querySelector('.app');
+  var gate = document.getElementById('gate');
+  var gStatus = document.getElementById('g-status');
+
+  function verify(o, r, t) {
+    return fetch('https://api.github.com/repos/' + encodeURIComponent(o) + '/' + encodeURIComponent(r), {
+      headers: { 'Authorization': 'Bearer ' + t, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }
+    }).then(function (res) {
+      if (res.status === 401) throw new Error('التوكن غير صحيح أو منتهي.');
+      if (!res.ok) throw new Error('تعذر الوصول إلى المستودع. راجع الاسم وصلاحيات التوكن.');
+      return res.json();
+    }).then(function (j) {
+      if (!j.permissions || !j.permissions.push) throw new Error('هذا التوكن لا يملك صلاحية الكتابة على المستودع.');
+    });
+  }
+  function unlock() { gate.hidden = true; app.hidden = false; render(); }
+  function showGate(msg) {
+    app.hidden = true; gate.hidden = false; gStatus.textContent = msg || '';
+    try {
+      var c = JSON.parse(localStorage.getItem('ghCfg') || '{}');
+      document.getElementById('g-owner').value = c.owner || '';
+      document.getElementById('g-repo').value = c.repo || '';
+    } catch (e) {}
+  }
+
+  document.getElementById('gate-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var o = document.getElementById('g-owner').value.trim();
+    var r = document.getElementById('g-repo').value.trim();
+    var t = document.getElementById('g-token').value.trim();
+    gStatus.textContent = 'جاري التحقق...';
+    verify(o, r, t).then(function () {
+      var cfg = {}; try { cfg = JSON.parse(localStorage.getItem('ghCfg') || '{}'); } catch (x) {}
+      cfg.owner = o; cfg.repo = r; cfg.branch = cfg.branch || 'main'; cfg.path = cfg.path || 'data.js';
+      localStorage.setItem('ghCfg', JSON.stringify(cfg));
+      sessionStorage.setItem('ghToken', t);
+      if (document.getElementById('g-remember').checked) localStorage.setItem('ghToken', t);
+      else localStorage.removeItem('ghToken');
+      document.getElementById('g-token').value = '';
+      unlock();
+    }).catch(function (err) { gStatus.textContent = err.message; });
+  });
+
+  // Auto-login if a token was saved earlier and is still valid
+  (function init() {
+    var t = sessionStorage.getItem('ghToken') || localStorage.getItem('ghToken');
+    var c = {}; try { c = JSON.parse(localStorage.getItem('ghCfg') || '{}'); } catch (e) {}
+    if (t && c.owner && c.repo) {
+      verify(c.owner, c.repo, t).then(unlock).catch(function () { showGate('انتهت الجلسة، سجّل الدخول من جديد.'); });
+    } else showGate();
+  })();
 })();
