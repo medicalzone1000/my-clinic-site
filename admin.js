@@ -13,13 +13,14 @@
     try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {
       toast('تعذر الحفظ: المساحة ممتلئة (جرّب صورة أصغر)'); return;
     }
+    markDirty(true);
     if (!silent) toast('تم الحفظ');
   }
   function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 350); }
-  function toast(t) {
+  function toast(t, ms) {
     var n = document.getElementById('toast');
     n.textContent = t; n.classList.add('show');
-    clearTimeout(toastTimer); toastTimer = setTimeout(function () { n.classList.remove('show'); }, 1800);
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { n.classList.remove('show'); }, ms || 1800);
   }
   function getPath(path) { return path.split('.').reduce(function (o, k) { return o[k]; }, data); }
 
@@ -253,6 +254,7 @@
         return api(url, { method: 'PUT', body: JSON.stringify(body) });
       }).then(function (res) {
         if (!res.ok) return res.json().then(function (j) { throw new Error((j && j.message) || ('خطأ ' + res.status)); });
+        markDirty(false);
         status.textContent = 'تم النشر. قد يستغرق ظهور التعديلات في الموقع دقيقة أو أكثر.';
       }).catch(function (e) { status.textContent = 'فشل النشر: ' + e.message; });
     }
@@ -301,6 +303,43 @@
     ]));
   }
 
+
+  /* ---------- Unpublished-changes indicator + top-bar publish ---------- */
+  function markDirty(v) {
+    if (v) localStorage.setItem('ghDirty', '1'); else localStorage.removeItem('ghDirty');
+    var d = document.getElementById('dirty');
+    if (d) d.hidden = !localStorage.getItem('ghDirty');
+  }
+  function publishNow() {
+    var cfg = {}; try { cfg = JSON.parse(localStorage.getItem('ghCfg') || '{}'); } catch (e) {}
+    var t = sessionStorage.getItem('ghToken') || localStorage.getItem('ghToken');
+    if (!cfg.owner || !cfg.repo || !t) { toast('سجّل الدخول من جديد ثم أعد المحاولة.', 6000); return; }
+    var b = cfg.branch || 'main', f = cfg.path || 'data.js';
+    var url = 'https://api.github.com/repos/' + encodeURIComponent(cfg.owner) + '/' + encodeURIComponent(cfg.repo) +
+      '/contents/' + f.split('/').map(encodeURIComponent).join('/');
+    var H = { 'Authorization': 'Bearer ' + t, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' };
+    var btn = document.getElementById('publish');
+    btn.disabled = true; toast('جاري النشر...', 60000);
+    fetch(url + '?ref=' + encodeURIComponent(b), { headers: H }).then(function (res) {
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error('تعذر قراءة الملف (' + res.status + ')، راجع صلاحيات التوكن.');
+      return res.json();
+    }).then(function (cur) {
+      var body = {
+        message: 'تحديث محتوى الموقع من لوحة التحكم',
+        content: btoa(unescape(encodeURIComponent('window.DEFAULT_SITE_DATA = ' + JSON.stringify(data, null, 2) + ';\n'))),
+        branch: b
+      };
+      if (cur && cur.sha) body.sha = cur.sha;
+      return fetch(url, { method: 'PUT', headers: Object.assign({ 'Content-Type': 'application/json' }, H), body: JSON.stringify(body) });
+    }).then(function (res) {
+      if (!res.ok) return res.json().then(function (j) { throw new Error((j && j.message) || ('خطأ ' + res.status)); });
+      markDirty(false);
+      toast('تم النشر على GitHub. انتظر دقيقة أو اثنتين ليظهر في الموقع.', 9000);
+    }).catch(function (e) { toast('فشل النشر: ' + e.message, 12000); })
+      .then(function () { btn.disabled = false; });
+  }
+
   /* ---------- Shell ---------- */
   var menu = document.getElementById('menu');
   var side = document.querySelector('.side');
@@ -328,6 +367,9 @@
     window.scrollTo(0, 0);
   }
   document.getElementById('toggle').addEventListener('click', function () { side.classList.toggle('open'); });
+
+  document.getElementById('publish').addEventListener('click', publishNow);
+  markDirty(!!localStorage.getItem('ghDirty'));
 
   /* ---------- Login gate: the GitHub token must have write access to the repo ---------- */
   var app = document.querySelector('.app');

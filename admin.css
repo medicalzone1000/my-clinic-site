@@ -57,3 +57,6 @@ h2.sub{font-size:1.05rem;color:var(--p);margin:1.5rem 0 .8rem}
 .gate-card p{color:#7a6a77;font-size:.92rem;margin-bottom:.6rem}
 .gate-card .btn{margin-top:.4rem}
 .g-status{color:var(--danger)!important;min-height:1.4em}
+
+.dirty{background:#fff3cd;color:#7a5a00;border:1px solid #f0d98a;border-radius:99px;padding:.1rem .7rem;font-size:.85rem}
+.bar .btn{white-space:nowrap}
