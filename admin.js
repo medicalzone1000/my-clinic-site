@@ -269,8 +269,44 @@
     ]));
   }
 
+  /* ---------- Compare local content with what is live on the site ---------- */
+  function fetchPublished() {
+    return fetch('data.js?t=' + Date.now(), { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('تعذر قراءة data.js من الموقع (' + r.status + ')');
+      return r.text();
+    }).then(function (t) {
+      var m = t.match(/DEFAULT_SITE_DATA\s*=\s*([\s\S]*?);\s*$/);
+      if (!m) throw new Error('صيغة data.js المنشور غير مفهومة');
+      return JSON.parse(m[1]);
+    });
+  }
+  function viewCheck() {
+    var status = h('p', { 'class': 'hint', role: 'status' });
+    content.appendChild(h('div', { 'class': 'card' }, [
+      h('h2', { 'class': 'sub', text: 'فحص الموقع المنشور' }),
+      h('p', { 'class': 'hint', text: 'يقارن ما في لوحة التحكم بما هو منشور فعلاً على الموقع الآن (بدون ذاكرة مؤقتة).' }),
+      h('div', { 'class': 'toolbar' }, [
+        h('button', { 'class': 'btn ghost', text: 'هل تعديلاتي ظاهرة في الموقع المنشور؟', onclick: function () {
+          status.textContent = 'جاري الفحص...';
+          fetchPublished().then(function (pub) {
+            status.textContent = JSON.stringify(pub) === JSON.stringify(data)
+              ? 'متطابق: الموقع المنشور يحتوي على كل تعديلاتك.'
+              : 'مختلف: ما على الموقع غير ما في اللوحة. إن كنت نشرت للتو فانتظر دقيقة أو اثنتين لاكتمال بناء الموقع ثم أعد الفحص، وإلا اضغط "نشر على GitHub".';
+          }).catch(function (e) { status.textContent = 'فشل الفحص: ' + e.message; });
+        } }),
+        h('button', { 'class': 'btn ghost', text: 'جلب المحتوى المنشور واستبدال نسختي المحلية', onclick: function () {
+          if (!confirm('سيتم استبدال تعديلاتك المحلية غير المنشورة بما هو منشور. متأكد؟')) return;
+          fetchPublished().then(function (pub) { data = pub; save(); markDirty(false); render(); toast('تم الجلب'); })
+            .catch(function (e) { status.textContent = 'فشل الجلب: ' + e.message; });
+        } })
+      ]),
+      status
+    ]));
+  }
+
   function viewTools() {
     viewPublish();
+    viewCheck();
     var imp = h('input', { type: 'file', accept: '.json,application/json', style: 'display:none' });
     imp.addEventListener('change', function () {
       var f = imp.files[0]; if (!f) return;
